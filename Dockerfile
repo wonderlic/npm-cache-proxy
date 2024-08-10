@@ -5,7 +5,7 @@ ARG ACCESS_TOKEN
 
 RUN apk add --no-cache git
 
-WORKDIR /srv/app
+WORKDIR /build
 ENV CGO_ENABLED=0 GOOS=linux GOARCH=amd64
 
 COPY go.mod go.sum ./
@@ -13,10 +13,10 @@ RUN go mod download
 
 COPY . .
 RUN go test -v ./...
-RUN go build -ldflags="-w -s" -o build
+RUN go build -ldflags="-w -s" -o npm-cache-proxy
 
 # === RUN STAGE === #
-FROM alpine as run
+FROM redis:alpine as run
 
 RUN apk update \
         && apk upgrade \
@@ -24,10 +24,16 @@ RUN apk update \
         && update-ca-certificates \
         && rm -rf /var/cache/apk/*
         
-WORKDIR /srv/app
-COPY --from=build /srv/app/build /srv/app/build
+COPY --from=build /build/npm-cache-proxy /app/npm-cache-proxy
+COPY entrypoint.sh /srv/entrypoint.sh
 
 ENV LISTEN_ADDRESS 0.0.0.0:8080
 ENV GIN_MODE release
 
-CMD ["/srv/app/build"]
+ENV REDIS_PASSWORD password
+ENV REDIS_ADDRESS 127.0.0.1:6379
+
+VOLUME /data
+WORKDIR /data
+
+CMD ["sh", "/srv/entrypoint.sh"]
