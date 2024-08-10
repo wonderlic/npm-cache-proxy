@@ -19,6 +19,7 @@ var rootOptions struct {
 	Silent          bool
 	ListenAddress   string
 	UpstreamAddress string
+	AuthToken       string
 	CacheLimit      string
 	CacheTTL        int
 }
@@ -27,6 +28,7 @@ func init() {
 	rootCmd.Flags().BoolVar(&rootOptions.Silent, "silent", getEnvBool("SILENT", "0"), "Disable logging")
 	rootCmd.Flags().StringVar(&rootOptions.ListenAddress, "listen", getEnvString("LISTEN_ADDRESS", "localhost:8080"), "Address to listen")
 	rootCmd.Flags().StringVar(&rootOptions.UpstreamAddress, "upstream", getEnvString("UPSTREAM_ADDRESS", "https://registry.npmjs.org"), "Upstream registry address")
+	rootCmd.Flags().StringVar(&rootOptions.AuthToken, "token", getEnvString("UPSTREAM_TOKEN", ""), "Upstream registry auth token")
 	rootCmd.Flags().StringVar(&rootOptions.CacheLimit, "cache-limit", getEnvString("CACHE_LIMIT", "0"), "Cached packages count limit")
 	rootCmd.Flags().IntVar(&rootOptions.CacheTTL, "cache-ttl", getEnvInt("CACHE_TTL", "3600"), "Cache expiration timeout in seconds")
 }
@@ -45,6 +47,7 @@ func run(cmd *cobra.Command, args []string) {
 				DatabasePrefix:     persistentOptions.RedisPrefix,
 				DatabaseExpiration: time.Duration(rootOptions.CacheTTL) * time.Second,
 				UpstreamAddress:    rootOptions.UpstreamAddress,
+				AuthToken:          rootOptions.AuthToken,
 			}, nil
 		},
 	}).ListenAndServe()

@@ -55,9 +55,10 @@ NCP provides command line interface for interaction with a cached data.
 <summary>Options</summary>
 
 | Options                       | Env                | Default                      | Description                         |
-| ----------------------------- | ------------------ | ---------------------------- | ----------------------------------- |
+|-------------------------------|--------------------|------------------------------|-------------------------------------|
 | `--listen <address>`          | `LISTEN_ADDRESS`   | `locahost:8080`              | Address to listen                   |
 | `--upstream <address>`        | `UPSTREAM_ADDRESS` | `https://registry.npmjs.org` | Upstream registry address           |
+| `--token <token>`             | `UPSTREAM_TOKEN`   | ``                           | Upstream registry auth token        |
 | `--silent <address>`          | `SILENT`           | `0`                          | Disable logs                        |
 | `--cache-limit <count>`       | `CACHE_LIMIT`      | -                            | Cached packages count limit         |
 | `--cache-ttl <timeout>`       | `CACHE_TTL`        | `3600`                       | Cache expiration timeout in seconds |
@@ -166,6 +167,7 @@ func main() {
 				DatabasePrefix:     "ncp-",
 				DatabaseExpiration: 1 * time.Hour,
 				UpstreamAddress:    "https://registry.npmjs.org",
+				AuthToken:          "",
 			}, nil
 		},
 	}).ListenAndServe()

@@ -23,6 +23,7 @@ type Options struct {
 	DatabasePrefix     string
 	DatabaseExpiration time.Duration
 	UpstreamAddress    string
+	AuthToken          string
 }
 
 // Database provides interface for data storage.
