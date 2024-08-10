@@ -27,6 +27,7 @@ func main() {
 				DatabasePrefix:     "ncp-",
 				DatabaseExpiration: 1 * time.Hour,
 				UpstreamAddress:    "https://registry.npmjs.org",
+				AuthToken:          "",
 			}, nil
 		},
 	}).ListenAndServe()
