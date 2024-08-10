@@ -55,7 +55,7 @@ NCP provides command line interface for interaction with a cached data.
 <summary>Options</summary>
 
 | Options                       | Env                | Default                      | Description                         |
-|-------------------------------|--------------------|------------------------------|-------------------------------------|
+| ----------------------------- | ------------------ | ---------------------------- | ----------------------------------- |
 | `--listen <address>`          | `LISTEN_ADDRESS`   | `locahost:8080`              | Address to listen                   |
 | `--upstream <address>`        | `UPSTREAM_ADDRESS` | `https://registry.npmjs.org` | Upstream registry address           |
 | `--token <token>`             | `UPSTREAM_TOKEN`   | ``                           | Upstream registry auth token        |

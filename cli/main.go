@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"os"
 
-	npmproxy "github.com/pkgems/npm-cache-proxy/proxy"
-	"github.com/go-redis/redis"
+	npmproxy "github.com/wonderlic/npm-cache-proxy/proxy"
+	"github.com/redis/go-redis/v9"
 )
 
 // global options

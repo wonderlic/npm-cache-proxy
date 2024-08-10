@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/pkgems/npm-cache-proxy/cli"
+	"github.com/wonderlic/npm-cache-proxy/cli"
 )
 
 func main() {

@@ -4,14 +4,14 @@ import (
 	"log"
 	"time"
 
-	npmproxy "github.com/pkgems/npm-cache-proxy/proxy"
+	npmproxy "github.com/wonderlic/npm-cache-proxy/proxy"
 	"github.com/spf13/cobra"
 )
 
 // start a server
 var rootCmd = &cobra.Command{
-	Use:   "ncp",
-	Short: "ncp is a fast npm cache proxy that stores data in Redis",
+	Use:   "npm-cache-proxy",
+	Short: "npm-cache-proxy is a fast npm cache proxy that stores data in Redis",
 	Run:   run,
 }
 
@@ -36,6 +36,7 @@ func init() {
 func run(cmd *cobra.Command, args []string) {
 	proxy := getProxy()
 
+	log.Print("npm-cache-proxy started")
 	log.Print("Listening on " + rootOptions.ListenAddress)
 
 	err := proxy.Server(npmproxy.ServerOptions{

@@ -3,7 +3,7 @@ package cli
 import (
 	"fmt"
 
-	npmproxy "github.com/pkgems/npm-cache-proxy/proxy"
+	npmproxy "github.com/wonderlic/npm-cache-proxy/proxy"
 	"github.com/spf13/cobra"
 )
 
