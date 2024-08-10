@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"regexp"
 	"strings"
+	"errors"
 )
 
 // GetCachedPath returns cached upstream response for a given url path.
@@ -19,7 +20,7 @@ func (proxy Proxy) GetCachedPath(options Options, path string, request *http.Req
 	// either package doesn't exist or there's some other problem
 	if err != nil {
 
-		// check if error is caused by nonexistend package
+		// check if error is caused by nonexistent package
 		// if no, return error
 		if err.Error() != "redis: nil" {
 			return nil, err
@@ -39,6 +40,9 @@ func (proxy Proxy) GetCachedPath(options Options, path string, request *http.Req
 		res, err := proxy.HttpClient.Do(req)
 		if err != nil {
 			return nil, err
+		}
+		if res.StatusCode != 200 {
+			return nil, errors.New("Non-200 response: " + res.Status)
 		}
 
 		if res.Header.Get("Content-Encoding") == "gzip" {
