@@ -32,6 +32,10 @@ func (proxy Proxy) GetCachedPath(options Options, path string, request *http.Req
 		req.Header = request.Header
 		req.Header.Set("Accept-Encoding", "gzip")
 
+		if options.AuthToken != "" {
+		  req.Header.Set("Authorization", "Bearer " + options.AuthToken)
+		}
+
 		res, err := proxy.HttpClient.Do(req)
 		if err != nil {
 			return nil, err
