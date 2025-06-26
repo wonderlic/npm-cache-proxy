@@ -33,8 +33,8 @@ func (proxy Proxy) Server(options ServerOptions) *http.Server {
 		router.Use(ginzap.RecoveryWithZap(logger, true))
 	}
 
-	router.GET("/:scope/:name", proxy.getPackageHandler(options))
-	router.GET("/:scope", proxy.getPackageHandler(options))
+	router.GET("/:scope/:name", proxy.getNonCachedHandler(options))
+	router.GET("/:scope", proxy.getNonCachedHandler(options))
 	router.NoRoute(proxy.noRouteHandler(options))
 
 	return &http.Server{
@@ -43,7 +43,25 @@ func (proxy Proxy) Server(options ServerOptions) *http.Server {
 	}
 }
 
-func (proxy Proxy) getPackageHandler(options ServerOptions) gin.HandlerFunc {
+func (proxy Proxy) getNonCachedHandler(options ServerOptions) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		options, err := options.GetOptions()
+
+		if err != nil {
+			c.AbortWithError(500, err)
+		} else {
+			pkg, err := proxy.GetNonCachedPath(options, c.Request.URL.Path, c.Request)
+
+			if err != nil {
+				c.AbortWithError(500, err)
+			} else {
+				c.Data(200, "application/json", pkg)
+			}
+		}
+	}
+}
+
+func (proxy Proxy) getCachedHandler(options ServerOptions) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		options, err := options.GetOptions()
 
@@ -63,7 +81,7 @@ func (proxy Proxy) getPackageHandler(options ServerOptions) gin.HandlerFunc {
 }
 
 func (proxy Proxy) noRouteHandler(options ServerOptions) gin.HandlerFunc {
-	tarballHandler := proxy.getPackageHandler(options)
+	tarballHandler := proxy.getCachedHandler(options)
 
 	return func(c *gin.Context) {
 		if strings.Contains(c.Request.URL.Path, ".tgz") {

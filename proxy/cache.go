@@ -28,43 +28,12 @@ func (proxy Proxy) GetCachedPath(options Options, path string, request *http.Req
 
 		// error is caused by nonexistent package
 		// fetch package
-		req, err := http.NewRequest("GET", options.UpstreamAddress+path, nil)
-
-		req.Header = request.Header
-		req.Header.Set("Accept-Encoding", "gzip")
-
-		if options.AuthToken != "" {
-		  req.Header.Set("Authorization", "Bearer " + options.AuthToken)
-		}
-
-		res, err := proxy.HttpClient.Do(req)
-		if err != nil {
-			return nil, err
-		}
-		if res.StatusCode != 200 {
-			return nil, errors.New("Non-200 response: " + res.Status)
-		}
-
-		if res.Header.Get("Content-Encoding") == "gzip" {
-			zr, err := gzip.NewReader(res.Body)
-			if err != nil {
-				log.Fatal(err)
-			}
-
-			res.Body = zr
-		}
-
-		defer res.Body.Close()
-		body, err := ioutil.ReadAll(res.Body)
+		body, err := proxy.GetNonCachedPath(options, path, request)
 		if err != nil {
 			return nil, err
 		}
 
-		pkg = string(body)
-
-		// TODO: avoid calling MustCompile every time
-		// find "dist": "https?://.*/ and replace to "dist": "{localurl}/
-		pkg = regexp.MustCompile(`(?U)"tarball":"https?://.*/`).ReplaceAllString(string(body), `"tarball": "http://`+request.Host+"/")
+	  pkg = string(body)
 
 		// save to redis
 		err = proxy.Database.Set(key, pkg, options.DatabaseExpiration)
@@ -72,6 +41,48 @@ func (proxy Proxy) GetCachedPath(options Options, path string, request *http.Req
 			return nil, err
 		}
 	}
+
+	return []byte(pkg), nil
+}
+
+// GetNonCachedPath returns non-cached upstream response for a given url path.
+func (proxy Proxy) GetNonCachedPath(options Options, path string, request *http.Request) ([]byte, error) {
+	// fetch package
+	req, err := http.NewRequest("GET", options.UpstreamAddress+path, nil)
+
+	req.Header = request.Header
+	req.Header.Set("Accept-Encoding", "gzip")
+
+	if options.AuthToken != "" {
+	  req.Header.Set("Authorization", "Bearer " + options.AuthToken)
+	}
+
+	res, err := proxy.HttpClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	if res.StatusCode != 200 {
+		return nil, errors.New("Non-200 response: " + res.Status)
+	}
+
+	if res.Header.Get("Content-Encoding") == "gzip" {
+		zr, err := gzip.NewReader(res.Body)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		res.Body = zr
+	}
+
+	defer res.Body.Close()
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	// TODO: avoid calling MustCompile every time
+	// find "dist": "https?://.*/ and replace to "dist": "{localurl}/
+	pkg := regexp.MustCompile(`(?U)"tarball":"https?://.*/`).ReplaceAllString(string(body), `"tarball": "http://`+request.Host+"/")
 
 	return []byte(pkg), nil
 }
